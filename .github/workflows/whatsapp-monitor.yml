@@ -1,0 +1,39 @@
+# .github/workflows/whatsapp-monitor.yml
+# Monitorea la conexión WhatsApp de AppLevel y envía alerta por Gmail
+# Corre automáticamente cada 6 horas (o manualmente desde GitHub)
+
+name: WhatsApp Connection Monitor — High Living Miami
+
+on:
+  schedule:
+    # Corre cada 6 horas: 00:00, 06:00, 12:00, 18:00 UTC (20:00, 02:00, 08:00, 14:00 EST)
+    - cron: "0 0,6,12,18 * * *"
+  workflow_dispatch:
+    # También permite ejecutarlo manualmente desde GitHub > Actions
+
+jobs:
+  check-connection:
+    name: Verificar conexión WhatsApp
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Checkout del repositorio
+        uses: actions/checkout@v4
+
+      - name: Configurar Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Instalar dependencias
+        run: npm install nodemailer
+
+      - name: Ejecutar monitor
+        env:
+          APPLEVEL_URL: ${{ secrets.APPLEVEL_URL }}
+          GMAIL_USER: ${{ secrets.GMAIL_USER }}
+          GMAIL_APP_PASS: ${{ secrets.GMAIL_APP_PASS }}
+          ALERT_EMAIL: ${{ secrets.ALERT_EMAIL }}
+          DEVICE_ALIAS: "High Living Miami — WhatsApp +1 (305) 500-1898"
+        run: node monitor.js
